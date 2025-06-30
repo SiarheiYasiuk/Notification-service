@@ -32,7 +32,7 @@ public class EmailService {
         sendEmail(toEmail, deletedSubject, content);
     }
 
-    private void sendEmail(String toEmail, String subject, String content) throws MessagingException {
+    void sendEmail(String toEmail, String subject, String content) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 

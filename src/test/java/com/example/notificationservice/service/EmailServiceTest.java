@@ -1,19 +1,15 @@
 package com.example.notificationservice.service;
 
 import jakarta.mail.MessagingException;
-import jakarta.mail.Session;
 import jakarta.mail.internet.MimeMessage;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.mail.javamail.JavaMailSender;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -22,39 +18,39 @@ class EmailServiceTest {
     @Mock
     private JavaMailSender mailSender;
 
-    @InjectMocks
-    private EmailService emailService; // здесь не мок, а настоящий с внедрённым mailSender
+    @Mock
+    private MimeMessage mimeMessage;
 
-    @BeforeEach
-    void setup() {
-        MimeMessage mimeMessage = new MimeMessage((Session) null);
+    @InjectMocks
+    private EmailService emailService;
+
+    @Test
+    void sendUserCreatedEmail_ShouldSendEmail() throws MessagingException {
         when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
 
-        injectField(emailService, "fromEmail", "test@from.com");
-        injectField(emailService, "createdSubject", "Создано");
-        injectField(emailService, "deletedSubject", "Удалено");
-    }
-
-    @Test
-    void sendUserCreatedEmail_shouldSendSuccessfully() throws MessagingException {
         emailService.sendUserCreatedEmail("test@example.com", "Test User");
-        verify(mailSender, times(1)).send(any(MimeMessage.class));
+
+        verify(mailSender).send(mimeMessage);
     }
 
     @Test
-    void sendUserDeletedEmail_shouldSendSuccessfully() throws MessagingException {
+    void sendUserDeletedEmail_ShouldSendEmail() throws MessagingException {
+        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+
         emailService.sendUserDeletedEmail("test@example.com", "Test User");
-        verify(mailSender, times(1)).send(any(MimeMessage.class));
+
+        verify(mailSender).send(mimeMessage);
     }
 
-    private void injectField(Object target, String fieldName, String value) {
-        try {
-            var field = target.getClass().getDeclaredField(fieldName);
-            field.setAccessible(true);
-            field.set(target, value);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    @Test
+    void sendEmail_ShouldSetCorrectParameters() throws MessagingException {
+        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+
+        emailService.sendEmail("to@example.com", "Subject", "Content");
+
+        verify(mimeMessage).setFrom("noreply@example.com");
+        verify(mimeMessage).setRecipients(MimeMessage.RecipientType.TO, "to@example.com");
+        verify(mimeMessage).setSubject("Subject");
+        verify(mimeMessage).setText("Content", "UTF-8");
     }
 }
-
