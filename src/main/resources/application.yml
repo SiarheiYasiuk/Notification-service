@@ -1,37 +1,5 @@
-server:
-  port: 8081
-
 spring:
-  kafka:
-    bootstrap-servers: localhost:9092
-    consumer:
-      group-id: test-group
-      auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      properties:
-        spring.json.trusted.packages: "*"
-    topic:
-      name: user-events
-
-
-  mail:
-    host: smtp.yandex.ru
-    port: 465
-    username: ${SMTP_USERNAME}
-    password: ${SMTP_PASSWORD}
-    protocol: smtp
-    properties:
-      mail.smtp:
-        auth: true
-        ssl.enable: true
-        connectiontimeout: 5000
-        timeout: 5000
-        writetimeout: 5000
-
-notification:
-  email:
-    from: ${SMTP_USERNAME}
-    subject:
-      created: "Ваш аккаунт успешно создан"
-      deleted: "Ваш аккаунт удален"
+  application:
+    name: notification-service
+  config:
+    import: optional:configserver:http://localhost:8888
